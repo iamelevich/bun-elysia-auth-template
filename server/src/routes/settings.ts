@@ -1,6 +1,5 @@
-import { asc, eq } from "drizzle-orm";
-import Elysia, { t } from "elysia";
-
+import { asc, sql } from "drizzle-orm";
+import Elysia, { NotFoundError, t } from "elysia";
 import { db } from "../db";
 import { SettingSelectSchema } from "../db/models";
 import { settings } from "../db/schema";
@@ -8,7 +7,10 @@ import { settings } from "../db/schema";
 const ROUTE_PREFIX = "/settings";
 
 const updateSettingBody = t.Object({
-  value: t.String({ minLength: 1, description: "The new value for the setting" }),
+  value: t.String({
+    minLength: 1,
+    description: "The new value for the setting",
+  }),
 });
 
 const batchUpdateSettingsBody = t.Array(
@@ -37,15 +39,21 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
   )
   .get(
     "/:key",
-    ({ params }) => {
-      return db.query.settings.findFirst({
+    async ({ params }) => {
+      const setting = await db.query.settings.findFirst({
         where: (setting, { eq }) => eq(setting.key, params.key),
       });
+      if (!setting) throw new NotFoundError("Setting not found");
+      return setting;
     },
     {
       params: t.Object({
         key: t.String({ minLength: 1 }),
       }),
+      response: {
+        200: SettingSelectSchema,
+        404: t.Literal("Setting not found"),
+      },
       detail: {
         summary: "Get setting by key",
         description: "Return a setting by its key",
@@ -60,9 +68,17 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
         const results = [];
         for (const { key, value } of body) {
           const [setting] = await tx
-            .update(settings)
-            .set({ value })
-            .where(eq(settings.key, key))
+            .insert(settings)
+            .values({
+              key,
+              value,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .onConflictDoUpdate({
+              target: settings.key,
+              set: { value, updatedAt: sql`strftime('%s', 'now')` },
+            })
             .returning();
           if (setting) results.push(setting);
         }
@@ -86,9 +102,17 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
     "/:key",
     async ({ params, body }) => {
       const [setting] = await db
-        .update(settings)
-        .set({ value: body.value })
-        .where(eq(settings.key, params.key))
+        .insert(settings)
+        .values({
+          key: params.key,
+          value: body.value,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: settings.key,
+          set: { value: body.value, updatedAt: sql`strftime('%s', 'now')` },
+        })
         .returning();
       return setting;
     },

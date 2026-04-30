@@ -16,5 +16,12 @@
       "tag": "0001_ambitious_blindfold",
       "breakpoints": true
     }
+    ,{
+      "idx": 2,
+      "version": "6",
+      "when": 1746052800000,
+      "tag": "0002_auth_settings_seed",
+      "breakpoints": true
+    }
   ]
 }

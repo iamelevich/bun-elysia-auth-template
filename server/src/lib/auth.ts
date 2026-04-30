@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { openAPI } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
@@ -19,6 +20,19 @@ export const auth = betterAuth({
     enabled: true,
   },
   plugins: [openAPI()],
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+      const setting = await db.query.settings.findFirst({
+        where: (s, { eq }) => eq(s.key, "auth.disable_registration"),
+      });
+      if (setting?.value === "true") {
+        throw new APIError("FORBIDDEN", {
+          message: "Registration is currently disabled",
+        });
+      }
+    }),
+  },
   databaseHooks: {
     session: {
       create: {

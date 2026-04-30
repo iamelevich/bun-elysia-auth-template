@@ -6,31 +6,18 @@ import { Elysia } from "elysia";
 import { version } from "../../package.json";
 import { api } from "./api";
 import { isProd } from "./env";
-import { auth } from "./lib/auth";
+import { authMiddleware } from "./middleware/auth";
 
 const app = new Elysia()
-  .mount(auth.handler)
   .use(cors())
   .use(
     openapi({
       documentation: {
         info: {
-          title: "Budzetto Server API",
-          description:
-            "API for the Budzetto server that powers the Budzetto web app that lets you manage your finances on your own server.",
+          title: "Super App Server API",
           version,
         },
-        tags: [
-          { name: "Accounts", description: "Account management endpoints" },
-          { name: "Balances", description: "Balance management endpoints" },
-          { name: "Categories", description: "Category management endpoints" },
-          { name: "Currencies", description: "Currency management endpoints" },
-          { name: "Payees", description: "Payee management endpoints" },
-          {
-            name: "Transactions",
-            description: "Transaction management endpoints",
-          },
-        ],
+        tags: [],
       },
       references: fromTypes(
         process.env.NODE_ENV === "production"
@@ -40,6 +27,7 @@ const app = new Elysia()
     }),
   )
   .use(logger())
+  .use(authMiddleware)
   .use(api);
 
 if (isProd) {

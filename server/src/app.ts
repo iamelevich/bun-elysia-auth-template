@@ -6,8 +6,10 @@ import { Elysia } from "elysia";
 import { version } from "../../package.json";
 import { api } from "./api";
 import { isProd } from "./env";
+import { auth } from "./lib/auth";
 
 const app = new Elysia()
+  .mount(auth.handler)
   .use(cors())
   .use(
     openapi({

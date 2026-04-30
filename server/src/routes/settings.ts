@@ -3,8 +3,11 @@ import Elysia, { NotFoundError, t } from "elysia";
 import { db } from "../db";
 import { SettingSelectSchema } from "../db/models";
 import { settings } from "../db/schema";
+import { authMiddleware } from "../middleware/auth";
+import { loggerService } from "../services/logger";
 
 const ROUTE_PREFIX = "/settings";
+const settingsLogger = loggerService.withCategory("settings");
 
 const updateSettingBody = t.Object({
   value: t.String({
@@ -21,6 +24,7 @@ const batchUpdateSettingsBody = t.Array(
 );
 
 export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
+  .use(authMiddleware)
   .get(
     "/",
     () => {
@@ -35,6 +39,7 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
         description: "Return all settings",
         tags: ["Settings"],
       },
+      auth: true,
     },
   )
   .get(
@@ -63,9 +68,17 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
   )
   .patch(
     "/batch",
-    async ({ body }) => {
-      return db.transaction(async (tx) => {
-        const results = [];
+    async ({ body, user }) => {
+      const keys = body.map((item) => item.key);
+      const prevSettings = await db.query.settings.findMany({
+        where: (s, { inArray }) => inArray(s.key, keys),
+      });
+      const prevValueMap = Object.fromEntries(
+        prevSettings.map((s) => [s.key, s.value]),
+      );
+
+      const results = await db.transaction(async (tx) => {
+        const updated = [];
         for (const { key, value } of body) {
           const [setting] = await tx
             .insert(settings)
@@ -80,10 +93,28 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
               set: { value, updatedAt: sql`strftime('%s', 'now')` },
             })
             .returning();
-          if (setting) results.push(setting);
+          if (setting) updated.push(setting);
         }
-        return results;
+        return updated;
       });
+
+      await Promise.all(
+        results.map((setting) =>
+          settingsLogger.info(`Setting "${setting.key}" changed`, {
+            key: setting.key,
+            prevValue: prevValueMap[setting.key] ?? null,
+            newValue: setting.value,
+            changedBy: {
+              userId: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            },
+          }),
+        ),
+      );
+
+      return results;
     },
     {
       body: batchUpdateSettingsBody,
@@ -96,11 +127,16 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
           "Update multiple settings in a single transaction. Body is an array of key/value pairs.",
         tags: ["Settings"],
       },
+      authAdmin: true,
     },
   )
   .patch(
     "/:key",
-    async ({ params, body }) => {
+    async ({ params, body, user }) => {
+      const prev = await db.query.settings.findFirst({
+        where: (s, { eq }) => eq(s.key, params.key),
+      });
+
       const [setting] = await db
         .insert(settings)
         .values({
@@ -114,6 +150,19 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
           set: { value: body.value, updatedAt: sql`strftime('%s', 'now')` },
         })
         .returning();
+
+      await settingsLogger.info(`Setting "${params.key}" changed`, {
+        key: params.key,
+        prevValue: prev?.value ?? null,
+        newValue: body.value,
+        changedBy: {
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+      });
+
       return setting;
     },
     {
@@ -126,5 +175,6 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
         description: "Update a setting's value by its key",
         tags: ["Settings"],
       },
+      authAdmin: true,
     },
   );

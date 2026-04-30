@@ -2,11 +2,13 @@ import { and, asc, count, desc, eq, like, type SQL } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { logDb } from "../db";
 import { logs } from "../db/log.schema";
+import { authMiddleware } from "../middleware/auth";
 import { PageInfoSchema } from "../schemas/pagination";
 
 export const logsRoutes = new Elysia({
   prefix: "/logs",
 })
+  .use(authMiddleware)
   .get(
     "/",
     async ({ query }) => {
@@ -111,6 +113,7 @@ export const logsRoutes = new Elysia({
         description: "Return list of all logs",
         tags: ["Logs"],
       },
+      authAdmin: true,
     },
   )
   .get(
@@ -138,5 +141,6 @@ export const logsRoutes = new Elysia({
         description: "Return list of all categories",
         tags: ["Logs"],
       },
+      authAdmin: true,
     },
   );

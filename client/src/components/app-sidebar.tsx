@@ -3,20 +3,23 @@
 import {
   IconFileText,
   IconHome,
+  IconLogout,
   IconPigMoney,
   IconSettings,
 } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
 import { NavMain } from "./nav-main";
 
 const mainItems = [
@@ -40,6 +43,13 @@ const mainItems = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await authClient.signOut();
+    navigate({ to: "/login" });
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -58,6 +68,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={mainItems} />
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <IconLogout />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

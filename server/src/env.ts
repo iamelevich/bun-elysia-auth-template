@@ -41,6 +41,7 @@ const EnvDTO = Type.Object({
     Object.fromEntries(logLevels.map((level) => [level, level])),
     { default: "info" },
   ),
+  CLIENT_URL: Type.String({ default: "http://localhost:5173" }),
 });
 
 export const isProd = process.env.NODE_ENV === "production";

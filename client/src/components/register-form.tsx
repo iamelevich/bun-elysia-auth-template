@@ -20,12 +20,30 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
-const loginSchema = v.object({
-  email: v.pipe(v.string(), v.email("Please enter a valid email address")),
-  password: v.pipe(v.string(), v.minLength(1, "Password is required")),
-});
+const registerSchema = v.pipe(
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, "Name is required")),
+    email: v.pipe(v.string(), v.email("Please enter a valid email address")),
+    password: v.pipe(
+      v.string(),
+      v.minLength(8, "Password must be at least 8 characters"),
+    ),
+    confirmPassword: v.pipe(
+      v.string(),
+      v.minLength(1, "Please confirm your password"),
+    ),
+  }),
+  v.forward(
+    v.partialCheck(
+      [["password"], ["confirmPassword"]],
+      (input) => input.password === input.confirmPassword,
+      "Passwords do not match",
+    ),
+    ["confirmPassword"],
+  ),
+);
 
-export function LoginForm({
+export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -34,21 +52,24 @@ export function LoginForm({
 
   const form = useForm({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
     validators: {
-      onSubmit: loginSchema,
+      onSubmit: registerSchema,
     },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const { error: signInError } = await authClient.signIn.email({
+      const { error: signUpError } = await authClient.signUp.email({
+        name: value.name,
         email: value.email,
         password: value.password,
       });
 
-      if (signInError) {
-        setServerError(signInError.message ?? "Invalid credentials");
+      if (signUpError) {
+        setServerError(signUpError.message ?? "Failed to create account");
         return;
       }
 
@@ -60,9 +81,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Sign in to your account</CardTitle>
+          <CardTitle>Create an account</CardTitle>
           <CardDescription>
-            Enter your email and password below to sign in
+            Enter your details below to create your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,9 +94,25 @@ export function LoginForm({
             }}
           >
             <FieldGroup>
-              {serverError && (
-                <FieldError className="text-center">{serverError}</FieldError>
-              )}
+              {serverError && <FieldError>{serverError}</FieldError>}
+              <form.Field name="name">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="text"
+                      placeholder="John Doe"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    {!field.state.meta.isValid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )}
+              </form.Field>
               <form.Field name="email">
                 {(field) => (
                   <Field>
@@ -97,15 +134,27 @@ export function LoginForm({
               <form.Field name="password">
                 {(field) => (
                   <Field>
-                    <div className="flex items-center justify-between">
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Link
-                        to="/forgot-password"
-                        className="text-sm underline underline-offset-4"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="password"
+                      placeholder="********"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    {!field.state.meta.isValid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="confirmPassword">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>
+                      Confirm password
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       type="password"
@@ -128,7 +177,7 @@ export function LoginForm({
                       disabled={isSubmitting}
                       className="w-full"
                     >
-                      {isSubmitting ? "Signing in…" : "Sign in"}
+                      {isSubmitting ? "Creating account…" : "Create account"}
                     </Button>
                   )}
                 </form.Subscribe>
@@ -136,9 +185,9 @@ export function LoginForm({
             </FieldGroup>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link to="/register" className="underline underline-offset-4">
-              Sign up
+            Already have an account?{" "}
+            <Link to="/login" className="underline underline-offset-4">
+              Sign in
             </Link>
           </div>
         </CardContent>

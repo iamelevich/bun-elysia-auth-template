@@ -20,39 +20,56 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
-const loginSchema = v.object({
-  email: v.pipe(v.string(), v.email("Please enter a valid email address")),
-  password: v.pipe(v.string(), v.minLength(1, "Password is required")),
-});
+const resetPasswordSchema = v.pipe(
+  v.object({
+    password: v.pipe(
+      v.string(),
+      v.minLength(8, "Password must be at least 8 characters"),
+    ),
+    confirmPassword: v.pipe(
+      v.string(),
+      v.minLength(1, "Please confirm your password"),
+    ),
+  }),
+  v.forward(
+    v.partialCheck(
+      [["password"], ["confirmPassword"]],
+      (input) => input.password === input.confirmPassword,
+      "Passwords do not match",
+    ),
+    ["confirmPassword"],
+  ),
+);
 
-export function LoginForm({
+export function ResetPasswordForm({
+  token,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { token: string }) {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
-      email: "",
       password: "",
+      confirmPassword: "",
     },
     validators: {
-      onSubmit: loginSchema,
+      onSubmit: resetPasswordSchema,
     },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const { error: signInError } = await authClient.signIn.email({
-        email: value.email,
-        password: value.password,
+      const { error } = await authClient.resetPassword({
+        newPassword: value.password,
+        token,
       });
 
-      if (signInError) {
-        setServerError(signInError.message ?? "Invalid credentials");
+      if (error) {
+        setServerError(error.message ?? "Failed to reset password");
         return;
       }
 
-      navigate({ to: "/" });
+      navigate({ to: "/login" });
     },
   });
 
@@ -60,10 +77,8 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Sign in to your account</CardTitle>
-          <CardDescription>
-            Enter your email and password below to sign in
-          </CardDescription>
+          <CardTitle>Reset your password</CardTitle>
+          <CardDescription>Enter a new password for your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -73,17 +88,15 @@ export function LoginForm({
             }}
           >
             <FieldGroup>
-              {serverError && (
-                <FieldError className="text-center">{serverError}</FieldError>
-              )}
-              <form.Field name="email">
+              {serverError && <FieldError>{serverError}</FieldError>}
+              <form.Field name="password">
                 {(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>New password</FieldLabel>
                     <Input
                       id={field.name}
-                      type="email"
-                      placeholder="m@example.com"
+                      type="password"
+                      placeholder="********"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -94,18 +107,12 @@ export function LoginForm({
                   </Field>
                 )}
               </form.Field>
-              <form.Field name="password">
+              <form.Field name="confirmPassword">
                 {(field) => (
                   <Field>
-                    <div className="flex items-center justify-between">
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Link
-                        to="/forgot-password"
-                        className="text-sm underline underline-offset-4"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
+                    <FieldLabel htmlFor={field.name}>
+                      Confirm new password
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       type="password"
@@ -128,7 +135,7 @@ export function LoginForm({
                       disabled={isSubmitting}
                       className="w-full"
                     >
-                      {isSubmitting ? "Signing in…" : "Sign in"}
+                      {isSubmitting ? "Resetting…" : "Reset password"}
                     </Button>
                   )}
                 </form.Subscribe>
@@ -136,9 +143,8 @@ export function LoginForm({
             </FieldGroup>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link to="/register" className="underline underline-offset-4">
-              Sign up
+            <Link to="/login" className="underline underline-offset-4">
+              Back to sign in
             </Link>
           </div>
         </CardContent>

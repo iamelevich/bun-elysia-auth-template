@@ -6,6 +6,7 @@ import { Elysia } from "elysia";
 import { version } from "../../package.json";
 import { api } from "./api";
 import { isProd } from "./env";
+import { OpenAPI } from "./lib/openapi";
 import { authMiddleware } from "./middleware/auth";
 
 const app = new Elysia()
@@ -18,6 +19,8 @@ const app = new Elysia()
           version,
         },
         tags: [],
+        components: await OpenAPI.components,
+        paths: await OpenAPI.getPaths(),
       },
       references: fromTypes(
         process.env.NODE_ENV === "production"

@@ -2,7 +2,7 @@ import Elysia from "elysia";
 import { auth } from "../lib/auth";
 
 export const authMiddleware = new Elysia({ name: "better-auth" })
-  .mount(auth.handler)
+  .mount("/auth", auth.handler)
   .macro({
     auth: {
       async resolve({ status, request: { headers } }) {

@@ -2,6 +2,7 @@ import {
   IconChevronRight,
   IconFileText,
   IconShieldLock,
+  IconUsers,
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -31,6 +32,12 @@ const routes = [
     url: "/settings/auth",
     icon: <IconShieldLock />,
     description: "Authentication and registration settings",
+  },
+  {
+    title: "Users",
+    url: "/settings/users",
+    icon: <IconUsers />,
+    description: "Manage user accounts and permissions",
   },
   {
     title: "Logs",

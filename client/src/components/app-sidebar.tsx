@@ -40,6 +40,10 @@ const adminItems = [
         url: "/settings/auth",
       },
       {
+        title: "Users",
+        url: "/settings/users",
+      },
+      {
         title: "Logs",
         url: "/settings/logs",
       },

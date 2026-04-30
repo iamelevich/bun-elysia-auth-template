@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -7,10 +7,19 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/(app)")({
+  beforeLoad: async ({ location }) => {
+    const { data: session } = await authClient.getSession();
+    if (!session) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: location.href },
+      });
+    }
+  },
   component: RouteComponent,
-  // loader: async ({ context: { queryClient } }) => {},
 });
 
 function RouteComponent() {

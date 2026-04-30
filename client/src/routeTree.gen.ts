@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as appSettingsRouteImport } from './routes/(app)/settings'
 import { Route as appSettingsIndexRouteImport } from './routes/(app)/settings/index'
 import { Route as appSettingsLogsRouteImport } from './routes/(app)/settings/logs_'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
   getParentRoute: () => rootRouteImport,
@@ -41,12 +47,14 @@ const appSettingsLogsRoute = appSettingsLogsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/login': typeof LoginRoute
   '/settings': typeof appSettingsRouteWithChildren
   '/': typeof appIndexRoute
   '/settings/logs': typeof appSettingsLogsRoute
   '/settings/': typeof appSettingsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/login': typeof LoginRoute
   '/': typeof appIndexRoute
   '/settings/logs': typeof appSettingsLogsRoute
   '/settings': typeof appSettingsIndexRoute
@@ -54,6 +62,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)': typeof appRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/(app)/settings': typeof appSettingsRouteWithChildren
   '/(app)/': typeof appIndexRoute
   '/(app)/settings/logs_': typeof appSettingsLogsRoute
@@ -61,12 +70,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/settings' | '/' | '/settings/logs' | '/settings/'
+  fullPaths: '/login' | '/settings' | '/' | '/settings/logs' | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings/logs' | '/settings'
+  to: '/login' | '/' | '/settings/logs' | '/settings'
   id:
     | '__root__'
     | '/(app)'
+    | '/login'
     | '/(app)/settings'
     | '/(app)/'
     | '/(app)/settings/logs_'
@@ -75,10 +85,18 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   appRouteRoute: typeof appRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)': {
       id: '/(app)'
       path: ''
@@ -147,6 +165,7 @@ const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   appRouteRoute: appRouteRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

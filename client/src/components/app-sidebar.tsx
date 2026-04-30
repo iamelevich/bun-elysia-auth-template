@@ -21,12 +21,15 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { NavMain } from "./nav-main";
 
-const mainItems = [
+const baseItems = [
   {
     title: "Dashboard",
     url: "/",
     icon: <IconHome />,
   },
+];
+
+const adminItems = [
   {
     title: "Settings",
     url: "/settings",
@@ -46,6 +49,9 @@ const mainItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === "admin";
+  const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -62,13 +68,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <IconPigMoney className="size-5!" />
-              <span className="text-base font-semibold">Super App</span>
+              <span className="text-base font-semibold">
+                Super App{" "}
+                <span className="text-xs text-muted-foreground">
+                  {isAdmin ? "Admin" : "User"}
+                </span>
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={mainItems} />
+        <NavMain items={items} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

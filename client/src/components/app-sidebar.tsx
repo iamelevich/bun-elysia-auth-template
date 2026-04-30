@@ -50,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <IconPigMoney className="size-5!" />
-              <span className="text-base font-semibold">Budzetto</span>
+              <span className="text-base font-semibold">Super App</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

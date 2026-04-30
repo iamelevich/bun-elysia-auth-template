@@ -1,13 +1,15 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { RegisterForm } from "@/components/register-form";
 import { authClient } from "@/lib/auth-client";
+import { fetchIsRegistrationDisabled } from "@/queries/settings";
 
 export const Route = createFileRoute("/register")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ context: { queryClient } }) => {
     const { data: session } = await authClient.getSession();
-    if (session) {
-      throw redirect({ to: "/" });
-    }
+    if (session) throw redirect({ to: "/" });
+
+    const isDisabled = await fetchIsRegistrationDisabled(queryClient);
+    if (isDisabled) throw redirect({ to: "/login" });
   },
   component: RegisterPage,
 });

@@ -1,13 +1,16 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { LoginForm } from "@/components/login-form";
 import { authClient } from "@/lib/auth-client";
+import { ensureRegistrationDisabled } from "@/queries/settings";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ context: { queryClient } }) => {
     const { data: session } = await authClient.getSession();
     if (session) {
       throw redirect({ to: "/" });
     }
+
+    await ensureRegistrationDisabled(queryClient);
   },
   component: LoginPage,
 });

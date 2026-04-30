@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useIsRegistrationDisabledQuery } from "@/queries/settings";
 import * as v from "valibot";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const { data: isRegistrationDisabled } = useIsRegistrationDisabledQuery();
 
   const form = useForm({
     defaultValues: {
@@ -135,12 +137,14 @@ export function LoginForm({
               </Field>
             </FieldGroup>
           </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link to="/register" className="underline underline-offset-4">
-              Sign up
-            </Link>
-          </div>
+          {!isRegistrationDisabled && (
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <Link to="/register" className="underline underline-offset-4">
+                Sign up
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

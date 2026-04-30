@@ -18,6 +18,7 @@ import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as appSettingsRouteImport } from './routes/(app)/settings'
 import { Route as appSettingsIndexRouteImport } from './routes/(app)/settings/index'
 import { Route as appSettingsLogsRouteImport } from './routes/(app)/settings/logs_'
+import { Route as appSettingsAuthRouteImport } from './routes/(app)/settings/auth_'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -63,6 +64,11 @@ const appSettingsLogsRoute = appSettingsLogsRouteImport.update({
   path: '/logs',
   getParentRoute: () => appSettingsRoute,
 } as any)
+const appSettingsAuthRoute = appSettingsAuthRouteImport.update({
+  id: '/auth_',
+  path: '/auth',
+  getParentRoute: () => appSettingsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof appSettingsRouteWithChildren
   '/': typeof appIndexRoute
+  '/settings/auth': typeof appSettingsAuthRoute
   '/settings/logs': typeof appSettingsLogsRoute
   '/settings/': typeof appSettingsIndexRoute
 }
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/': typeof appIndexRoute
+  '/settings/auth': typeof appSettingsAuthRoute
   '/settings/logs': typeof appSettingsLogsRoute
   '/settings': typeof appSettingsIndexRoute
 }
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/(app)/settings': typeof appSettingsRouteWithChildren
   '/(app)/': typeof appIndexRoute
+  '/(app)/settings/auth_': typeof appSettingsAuthRoute
   '/(app)/settings/logs_': typeof appSettingsLogsRoute
   '/(app)/settings/': typeof appSettingsIndexRoute
 }
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/'
+    | '/settings/auth'
     | '/settings/logs'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/'
+    | '/settings/auth'
     | '/settings/logs'
     | '/settings'
   id:
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/(app)/settings'
     | '/(app)/'
+    | '/(app)/settings/auth_'
     | '/(app)/settings/logs_'
     | '/(app)/settings/'
   fileRoutesById: FileRoutesById
@@ -201,15 +213,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appSettingsLogsRouteImport
       parentRoute: typeof appSettingsRoute
     }
+    '/(app)/settings/auth_': {
+      id: '/(app)/settings/auth_'
+      path: '/auth'
+      fullPath: '/settings/auth'
+      preLoaderRoute: typeof appSettingsAuthRouteImport
+      parentRoute: typeof appSettingsRoute
+    }
   }
 }
 
 interface appSettingsRouteChildren {
+  appSettingsAuthRoute: typeof appSettingsAuthRoute
   appSettingsLogsRoute: typeof appSettingsLogsRoute
   appSettingsIndexRoute: typeof appSettingsIndexRoute
 }
 
 const appSettingsRouteChildren: appSettingsRouteChildren = {
+  appSettingsAuthRoute: appSettingsAuthRoute,
   appSettingsLogsRoute: appSettingsLogsRoute,
   appSettingsIndexRoute: appSettingsIndexRoute,
 }

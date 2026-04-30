@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  IconFileText,
   IconHome,
   IconLogout,
   IconPigMoney,
@@ -34,9 +33,12 @@ const mainItems = [
     icon: <IconSettings />,
     items: [
       {
+        title: "Auth",
+        url: "/settings/auth",
+      },
+      {
         title: "Logs",
         url: "/settings/logs",
-        icon: <IconFileText />,
       },
     ],
   },

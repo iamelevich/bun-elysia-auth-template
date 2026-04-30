@@ -17,7 +17,7 @@ export function createUsersColumns({
   onToggleBan,
   currentUserId,
 }: {
-  onSetRole: (userId: string, role: string) => void;
+  onSetRole: (userId: string, role: "user" | "admin") => void;
   onToggleBan: (userId: string, isBanned: boolean) => void;
   currentUserId?: string;
 }): ColumnDef<AdminUser>[] {
@@ -50,7 +50,9 @@ export function createUsersColumns({
         return (
           <Select
             value={user.role ?? "user"}
-            onValueChange={(role) => onSetRole(user.id, role)}
+            onValueChange={(role) =>
+              onSetRole(user.id, role as "user" | "admin")
+            }
             disabled={isCurrentUser}
           >
             <SelectTrigger size="sm" className="w-24">

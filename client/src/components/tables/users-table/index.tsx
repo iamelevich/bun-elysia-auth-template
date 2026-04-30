@@ -37,7 +37,7 @@ export function UsersTable({
   const unbanMutation = useUnbanUserMutation();
 
   const handleSetRole = useCallback(
-    (userId: string, role: string) => {
+    (userId: string, role: "user" | "admin") => {
       setRoleMutation.mutate(
         { userId, role },
         {

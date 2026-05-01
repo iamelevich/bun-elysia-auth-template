@@ -6,7 +6,3 @@
 # test
 !.env.test
 coverage
-
-# local db file
-local.db
-*.local.db

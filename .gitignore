@@ -2,3 +2,7 @@ node_modules
 .turbo
 dist
 .DS_Store
+
+# local db file
+local.db
+*.local.db

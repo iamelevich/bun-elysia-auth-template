@@ -2,7 +2,7 @@ import { type Static, type TObject, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { logLevels } from "./db/log.schema";
 
-function parseEnv<T extends TObject>(
+export function parseEnv<T extends TObject>(
   schema: T,
   env: Record<string, string | undefined>,
 ): Static<T> {
@@ -25,11 +25,12 @@ function parseEnv<T extends TObject>(
   return converted;
 }
 
-const EnvDTO = Type.Object({
+export const EnvDTO = Type.Object({
   NODE_ENV: Type.Enum(
     {
       development: "development",
       production: "production",
+      test: "test",
     },
     { default: "development" },
   ),

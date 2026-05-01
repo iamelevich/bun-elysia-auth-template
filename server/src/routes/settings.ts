@@ -151,6 +151,8 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
         })
         .returning();
 
+      if (!setting) throw new NotFoundError("Setting not found");
+
       await settingsLogger.info(`Setting "${params.key}" changed`, {
         key: params.key,
         prevValue: prev?.value ?? null,
@@ -169,6 +171,10 @@ export const settingsRoutes = new Elysia({ prefix: ROUTE_PREFIX })
       params: t.Object({
         key: t.String({ minLength: 1 }),
       }),
+      response: {
+        200: SettingSelectSchema,
+        404: t.Literal("Setting not found"),
+      },
       body: updateSettingBody,
       detail: {
         summary: "Update setting by key",

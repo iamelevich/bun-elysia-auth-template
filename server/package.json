@@ -39,6 +39,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@elysia/eden": "^1.4.10",
     "@elysiajs/cors": "^1.4.2",
     "@elysiajs/openapi": "^1.4.15",
     "@elysiajs/static": "^1.4.10",

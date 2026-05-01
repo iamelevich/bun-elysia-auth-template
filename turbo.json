@@ -10,6 +10,11 @@
     },
     "check": {
       "dependsOn": ["^check"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "dotEnv": [".env.test"],
+      "cache": false
     }
   }
 }

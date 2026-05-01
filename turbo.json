@@ -13,7 +13,6 @@
     },
     "test": {
       "dependsOn": ["^test"],
-      "dotEnv": [".env.test"],
       "cache": false
     }
   }

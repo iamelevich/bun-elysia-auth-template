@@ -2,8 +2,6 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import {
   createClient,
   getSessionCookie,
-  seedTestUsers,
-  setupTestDb,
   TEST_USERS,
 } from "../helpers/test-helpers";
 
@@ -12,8 +10,6 @@ let adminApi: ReturnType<typeof createClient>;
 let userApi: ReturnType<typeof createClient>;
 
 beforeAll(async () => {
-  await setupTestDb();
-  await seedTestUsers();
   const adminCookie = await getSessionCookie(
     TEST_USERS.admin.email,
     TEST_USERS.admin.password,

@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "check": "turbo run check"
+    "check": "turbo run check",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.13"

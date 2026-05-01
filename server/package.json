@@ -28,7 +28,7 @@
     "lint": "biome lint",
     "lint:write": "biome lint --write",
     "check": "biome check",
-    "test": "bun test src/**/*.test.ts"
+    "test": "bun test --env-file=.env.test src/**/*.test.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.13",

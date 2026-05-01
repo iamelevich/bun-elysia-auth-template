@@ -1,0 +1,5 @@
+[test]
+preload = ["./src/helpers/test-setup.ts"]
+coverage = true
+coverageReporter = ["text", "lcov"]
+coveragePathIgnorePatterns = ["src/db/*.ts", "src/helpers/test-*.ts"]

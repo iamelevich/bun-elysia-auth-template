@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import { and, eq, like } from "drizzle-orm";
 import { app } from "../app";
 import { db, logDb } from "../db";

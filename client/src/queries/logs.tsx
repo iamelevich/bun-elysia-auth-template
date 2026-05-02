@@ -19,9 +19,14 @@ const logsQueryOptions = (params: LogsQueryParams = {}) =>
     queryFn: async () => {
       const { data, error } = await app.api.logs.get({ query: params });
       if (error) {
-        throw new Error(
-          `${error.status} - ${error.value.summary ?? error.value.on}`,
-        );
+        if (typeof error.value === "string") {
+          throw new Error(`${error.status} - ${error.value}`);
+        } else if (error.value.summary) {
+          throw new Error(`${error.status} - ${error.value.summary}`);
+        } else if (error.value.on) {
+          throw new Error(`${error.status} - ${error.value.on}`);
+        }
+        throw new Error(`${error.status} - ${error.value}`);
       }
       return data;
     },
@@ -51,9 +56,14 @@ const logsCategoriesQueryOptions = () =>
     queryFn: async () => {
       const { data, error } = await app.api.logs.categories.get();
       if (error) {
-        throw new Error(
-          `${error.status} - ${error.value.summary ?? error.value.on}`,
-        );
+        if (typeof error.value === "string") {
+          throw new Error(`${error.status} - ${error.value}`);
+        } else if (error.value.summary) {
+          throw new Error(`${error.status} - ${error.value.summary}`);
+        } else if (error.value.on) {
+          throw new Error(`${error.status} - ${error.value.on}`);
+        }
+        throw new Error(`${error.status} - ${error.value}`);
       }
       return data;
     },

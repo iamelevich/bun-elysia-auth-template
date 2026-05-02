@@ -6,7 +6,9 @@
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir ../dist --target bun --sourcemap",
+    "build": "bun run build:server && bun run build:migrations",
+    "build:server": "bun build src/index.ts --outdir ../dist --target bun --sourcemap",
+    "build:migrations": "bun build scripts/migrate.ts --outdir ../dist --target bun --sourcemap && cp -r drizzle ../dist/drizzle",
     "db:pull": "drizzle-kit pull",
     "db:push": "drizzle-kit push",
     "db:check": "drizzle-kit check",

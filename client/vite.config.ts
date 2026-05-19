@@ -44,6 +44,10 @@ export default defineConfig({
         __dirname,
         "../node_modules/@tanstack/react-form",
       ),
+      "@tanstack/store": path.resolve(
+        __dirname,
+        "../node_modules/@tanstack/store",
+      ),
       "@tanstack/react-store": path.resolve(
         __dirname,
         "../node_modules/@tanstack/react-store",

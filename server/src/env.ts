@@ -43,7 +43,8 @@ export const EnvDTO = Type.Object({
     { default: "info" },
   ),
   CLIENT_URL: Type.String({ default: "http://localhost:5173" }),
+  BETTER_AUTH_URL: Type.String({ default: "http://localhost:3000" }),
 });
 
-export const isProd = process.env.NODE_ENV === "production";
 export const env = parseEnv(EnvDTO, process.env);
+export const isProd = env.NODE_ENV === "production";

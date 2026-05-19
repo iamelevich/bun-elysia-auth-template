@@ -46,11 +46,13 @@ export class LoggerService {
       return;
     }
 
+    console.log(`[${level}] ${this.category ?? "app"} ${message}`, data);
+
     // Insert the log into the database
     await logDb.insert(logs).values({
       timestamp: new Date(),
       level,
-      category: this.category,
+      category: this.category ?? "app",
       message,
       data,
     });
